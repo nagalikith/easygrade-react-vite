@@ -1,0 +1,71 @@
+.editorWrap {
+  max-height: 100vh;
+  width: 100%;
+  /* border: 1px solid blue; */
+  overflow-y: scroll;
+  font-family: poppins, sans-serif;
+}
+.editorWrap::-webkit-scrollbar {
+  display: none;
+}
+
+.editorBox {
+  width: 90%;
+  /* border: 1px solid green; */
+  margin: 50px auto;
+}
+
+.editorHeader{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px;
+}
+
+
+.editorAssignmentName{
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+
+.editorLanguageSelector>select{
+  border: none;
+  outline: none;
+  cursor: pointer;
+}
+
+.editorConsole {
+  width: 100%;
+  /* border: 1px solid red; */
+}
+
+.editorFooter{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 30px;
+}
+
+.assignmentSubmitBtn{
+  background-color: #242424  !important;
+  color: #fff  !important;
+  border-radius: 0 !important;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+#uploadFileLabel{
+  background-color: #242424;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 500;
+  padding: 0.5rem;
+  width: 200px;
+  text-align: center;
+  cursor: pointer;
+  margin-top: 1rem ;
+}

@@ -1,0 +1,29 @@
+
+.footerWrap{
+   height: 60px;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #242424;
+ margin: 0;
+ padding: 0;
+
+position: absolute;
+z-index: 999;
+bottom: 0;
+left: 0;
+
+
+ }
+
+ .footerBtn{
+  margin: 0 20px;
+  max-height: 50px !important;
+  color:#A38B13 !important ;
+  font-family: "poppins",sans-serif;
+  font-weight: 500 !important;
+ 
+
+ }

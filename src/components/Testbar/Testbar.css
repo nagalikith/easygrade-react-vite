@@ -1,0 +1,55 @@
+
+.testbarWrap{
+  max-height: 100vh;
+ width: 100%;
+
+}
+
+.testbarBox{
+ height: 100vh; 
+  width: 100%;
+  font-family: "poppins",sans-serif;
+  background-color: #ffffff;
+  margin: 0;
+  padding: 0;
+  overflow: scroll;
+padding-bottom: 80px;
+}
+.testbarBox::-webkit-scrollbar{
+  display: none;
+}
+
+
+.testcaseHeader{
+   font-size: 1.3rem;
+   font-weight: 700;
+   color: #242424;
+   padding: 20px;
+}
+
+.testcaseBox{
+  max-width: 100%;
+  /* border: 1px solid blue; */
+  margin: 10px;
+
+}
+
+.testcaseHead{
+  padding: 0px 10px;
+}
+
+.testcaseFieldHead{
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 3px;
+
+}
+
+.testcaseField{
+  font-size: 15px;
+  font-weight: 300;
+  color: #242424;
+  width: 100%;
+  background-color: #ebebebe2;
+  padding: 10px;
+}
