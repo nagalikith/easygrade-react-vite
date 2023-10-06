@@ -19,13 +19,14 @@ import {
   LuSettings,
   LuUsers,
 } from "react-icons/lu";
+import { NavLink } from "react-router-dom";
 
 function Sidebar() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = React.useRef();
 
   return (
-    <div className="SidebarWrap" >
+    <div className="SidebarWrap">
       <IconButton // This is the button that opens the sidebar
         className="dashboardOpenBtn"
         ref={btnRef}
@@ -55,7 +56,7 @@ function Sidebar() {
           <DrawerBody className="drawerBodyWrap">
             <div className="userProfile">
               <LuUser2 />
-              <a href="#">Ankit Kumar</a>
+              <NavLink to="/account">Ankit Kumar</NavLink>
             </div>
             <hr></hr>
             <DrawerHeader className="dashboardHeader">Course</DrawerHeader>
@@ -103,7 +104,7 @@ function Sidebar() {
 
           <DrawerFooter>
             <hr></hr>
-            <h3  className="footerName">Assignment Name</h3>
+            <h3 className="footerName">Assignment Name</h3>
           </DrawerFooter>
         </DrawerContent>
       </Drawer>

@@ -21,7 +21,8 @@ function Testbar() {
           <h1 className="testcaseHeader">Test cases</h1>
         </Box>
 
-        <Box className="testcaseBox">
+        <Box className="testcaseBox">  
+         {/* test case accordion */}
           <Accordion defaultIndex={[0]} allowMultiple>
             <AccordionItem>
               <h2>
@@ -68,12 +69,12 @@ function Testbar() {
                     </p>
                   </Box>
                 </Box>
-                { isPassed ? (
+                {isPassed ? (
                   <Alert status="success">
                     <AlertIcon />
                     Test case passed!
                   </Alert>
-                ): (
+                ) : (
                   <Alert status="error">
                     <AlertIcon />
                     Test case passed!
@@ -127,12 +128,12 @@ function Testbar() {
                     </p>
                   </Box>
                 </Box>
-                { isPassed ? (
+                {isPassed ? (
                   <Alert status="success">
                     <AlertIcon />
                     Test case passed!
                   </Alert>
-                ): (
+                ) : (
                   <Alert status="error">
                     <AlertIcon />
                     Test case passed!

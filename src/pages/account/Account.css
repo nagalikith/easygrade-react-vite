@@ -1,0 +1,82 @@
+.accountContainer {
+    width: 100vw;
+    background-color: rgb(230, 228, 227);
+
+}
+
+
+.accountWrapper{
+    width: 90vw;
+    margin: auto;
+ display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.accountLogoutWrapper{
+    width: 100%;
+    display: flex;  
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.accountTitle {
+    width: 100%;
+    text-align: left;
+    margin-top: 20px;
+    font-family: poppins,"sans-serif";
+    font-weight: 700;
+    font-size: 2rem;
+}
+
+.accountInfoWrapper{
+   margin-top: 30px;
+
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.accountInfo{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.accountInfoTitle{
+    font-family: poppins,"sans-serif";
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-right: 10px;
+    width: 200px;
+    padding: 10px 0;
+}
+.accountInfoData{
+    font-family: poppins,"sans-serif";
+    font-weight: 400;
+    font-size: 1.2rem;
+}
+
+.accountAccessibilityButtons{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.accountAccessBtn{
+    width: 200px;
+    margin: 20px 0px;
+    margin-right: 10px;
+    border: none;
+    font-family: poppins,"sans-serif";
+    cursor: pointer;
+}

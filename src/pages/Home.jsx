@@ -1,5 +1,5 @@
 // import Editor from "../components/Editor/Editor";
-// import Footer from "../components/Footer/Footer";
+import Footer from "../components/Footer/Footer";
 // import Sidebar from "../components/Sidebar/Sidebar";
 // import Testbar from "../components/Testbar/Testbar";
 import Editor from "../components/Editor/Editor";
@@ -45,7 +45,7 @@ function Home() {
 
 </div>
 </div>
-{/* <Footer/> */}
+<Footer/>
 
       {/* <Sidebar/>
       <div className="editorContainer"> <Editor/></div>
