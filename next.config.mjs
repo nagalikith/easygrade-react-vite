@@ -11,7 +11,6 @@ const nextConfig = {
           protocol: 'https',
           hostname: 'avatars.githubusercontent.com'
       }]
-  },
-  middleware: true, // You can enable middleware if required for advanced routing.
+  }
 }
 export default nextConfig;
