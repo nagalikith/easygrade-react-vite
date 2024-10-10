@@ -16,7 +16,7 @@ export default function GradescopeInterface() {
       <nav className="bg-white border-b px-4 py-2 flex items-center">
         <div className="flex items-center gap-2 text-teal-600 font-semibold">
           <div className="w-4 h-4 bg-teal-600"></div>
-          gradescope
+          Cleferr
         </div>
         <button className="ml-2">≡</button>
         <div className="ml-4 text-gray-600">Gradescope 101</div>
@@ -27,8 +27,8 @@ export default function GradescopeInterface() {
       <div className="flex">
         {/* Sidebar */}
         <div className="w-64 bg-white h-screen border-r p-4">
-          <h2 className="font-semibold mb-2">Gradescope 101</h2>
-          <div className="text-sm text-gray-500 mb-4">Introduction to Gradescope</div>
+          <h2 className="font-semibold mb-2">Cleferr 101</h2>
+          <div className="text-sm text-gray-500 mb-4">Introduction to Cleferr</div>
           
           <div className="mb-4">
             <div className="flex items-center gap-2 text-teal-600 mb-2">

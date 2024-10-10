@@ -32,8 +32,8 @@ export const authService = {
       if (response.data.token) {
         // Store user data (excluding the token) in memory or a secure storage mechanism
         Cookies.set('user', JSON.stringify(response.data.user), {
-          secure: true, // Ensure cookies are sent over HTTPS
-          sameSite: 'Strict', // Prevent CSRF attacks
+          secure: process.env.NODE_ENV === 'production', // Ensure cookies are sent over HTTPS
+          sameSite: 'Lax', // Prevent CSRF attacks
           httpOnly: false, // The token should be httpOnly (set server-side), user details are fine here
         });
       }

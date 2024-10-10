@@ -129,8 +129,8 @@ export default function GradebookInterface() {
               </a>
             </nav>
   
-            <div className="mt-8">
-              <h2 className="text-sm uppercase text-blue-300 mb-2">Instructor</h2>
+            <div className="mt-9">
+              <h2 className="text-sm uppercase text-blue-300 mb-2">Instructors</h2>
               <div className="flex items-center">
                 <User className="mr-2" size={20} aria-hidden="true" />
                 <span>Demo Instructor</span>
@@ -139,7 +139,7 @@ export default function GradebookInterface() {
           </div>
   
           {/* Main content */}
-          <div className="flex-1 p-6">
+          <div className="flex-grow p-6">
             <div className="flex justify-between items-center mb-6">
               <div>
                 <h1 className="text-3xl font-bold text-gray-800">Cleferr 101</h1>
