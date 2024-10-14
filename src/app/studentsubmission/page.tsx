@@ -19,7 +19,7 @@ export default function GradescopeInterface() {
           Cleferr
         </div>
         <button className="ml-2">≡</button>
-        <div className="ml-4 text-gray-600">Gradescope 101</div>
+        <div className="ml-4 text-gray-600">Cleferr 101</div>
         <div className="ml-4 text-gray-400">Summer 2020</div>
       </nav>
 

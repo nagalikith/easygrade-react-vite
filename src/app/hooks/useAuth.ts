@@ -34,7 +34,7 @@ export const authService = {
         Cookies.set('user', JSON.stringify(response.data.user), {
           secure: process.env.NODE_ENV === 'production', // Ensure cookies are sent over HTTPS
           sameSite: 'Lax', // Prevent CSRF attacks
-          httpOnly: false, // The token should be httpOnly (set server-side), user details are fine here
+          httpOnly: false, // The token should be httpOnly (set server-side)
         });
       }
 
