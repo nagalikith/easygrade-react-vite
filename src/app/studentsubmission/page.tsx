@@ -5,9 +5,9 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/app/components/ui/dialog";
-import { Button } from "@/app/components/ui/button";
-import { Alert, AlertDescription } from "@/app/components/ui/alert";
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function GradescopeInterface() {
   return (

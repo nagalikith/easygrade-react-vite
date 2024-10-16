@@ -1,11 +1,12 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
-import { Card, CardHeader, CardContent } from '@/app/components/ui/card';
-import { Button } from '@/app/components/ui/button';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Pencil, Check, Square, Eraser, Lightbulb } from 'lucide-react';
-import { Input } from '@/app/components/ui/input';
+import { Input } from '@/components/ui/input';
 import { Stage, Layer, Line } from 'react-konva';
 import { pdfjs,Document, Page } from 'react-pdf';
+import RubricOutline from './rubricoutline';
 
 if (typeof Promise.withResolvers === 'undefined') {
   if (window)
@@ -167,40 +168,7 @@ const GradingInterface: React.FC = () => {
       </Card>
 
       <Card>
-        <CardHeader className="p-4 border-b">
-          <h3 className="text-lg font-medium">Grading</h3>
-        </CardHeader>
-        <CardContent className="p-4">
-          <div className="mb-4">
-            <h4 className="font-bold mb-2">Score</h4>
-            <p className="text-xl mb-2">{score}</p>
-            <div className="grid grid-cols-3 gap-2">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 'CLR', 0, '.'].map((item, index) => (
-                <Button
-                  key={index}
-                  variant="outline"
-                  onClick={() => handleScoreInput(item)}
-                >
-                  {item}
-                </Button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <h4 className="font-bold mb-2">Feedback</h4>
-            <Input
-              type="text"
-              value={wellDone}
-              onChange={(e) => setWellDone(e.target.value)}
-              placeholder="Well done"
-              className="w-full mb-2"
-            />
-            <div className="flex justify-between">
-              <Button variant="outline">Cancel</Button>
-              <Button className="bg-teal-600 hover:bg-teal-700 text-white" onClick={handleSave}>Save</Button>
-            </div>
-          </div>
-        </CardContent>
+      <RubricOutline title="Demo Homework 1" initialPoints={2} />
       </Card>
     </div>
   );

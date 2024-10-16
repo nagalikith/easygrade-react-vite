@@ -21,7 +21,7 @@ const GradingPage = () => {
           </div>
         </header>
 
-        <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div className=" mx-auto py-6 sm:px-6 lg:px-8">
           {/* Top bar */}
           <div className="bg-white shadow-sm mb-6 p-4 flex justify-between items-center">
             <div className="flex space-x-4">

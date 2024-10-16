@@ -1,8 +1,8 @@
 import React from 'react';
 import { Menu, Filter, HelpCircle, Grid } from 'lucide-react';
-import { Button } from '@/app/components/ui/button';
-import { Card, CardHeader, CardContent } from '@/app/components/ui/card';
-import { Separator } from '@/app/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import GradingInterface from '@/app/components/gradinginterface';
 
 const GradingPage: React.FC = () => {
