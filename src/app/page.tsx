@@ -1,29 +1,40 @@
-// app/page.tsx
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from './hooks/useAuth';
+import { authService, useAuthStore } from './hooks/useAuth';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation'; // Updated import
+
+
 interface LoginCredentials {
   username: string;
   password: string;
 }
+
 export default function Home() {
-  const { user, login, logout } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const router = useRouter()
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
     try {
       const credentials: LoginCredentials = { username, password };
-      console.log(credentials);
-      await login(credentials);
-      setError('');
-    } catch (error) {
-      setError('Login failed. Please check your credentials.');
+      await authService.login(credentials);
+      router.push('/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleLogout = async () => {
+    await authService.logout();
   };
 
   const handleOAuthSignIn = (provider: string) => {
@@ -35,8 +46,6 @@ export default function Home() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
       <h1 className="text-4xl font-bold mb-4">Welcome to Cleferr AI</h1>
       <p className="text-lg mb-6">All-in-one grading tool for teachers</p>
-
-      {!user ? (
         <div className="space-y-4">
           <form onSubmit={handleLogin} className="mb-4">
             <input
@@ -83,17 +92,6 @@ export default function Home() {
             Sign in with GitHub
           </button>
         </div>
-      ) : (
-        <div className="text-center">
-          <p className="mb-4">Signed in as {user.username}</p>
-          <button
-            className="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600"
-            onClick={logout}
-          >
-            Sign Out
-          </button>
-        </div>
-      )}
     </div>
   );
 }
