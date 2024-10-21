@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import { useAuthStore } from '@/app/hooks/useAuth';
+import { useAuthStore } from '@/store';
 
 // Axios instance for API requests
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000';
@@ -21,6 +21,10 @@ interface CourseProps {
   subtitle: string;
   assignmentCount: number;
   sectionId: string;
+  instructor: string;
+  enrollmentCount: number;
+  startDate: string;
+  endDate: string;
 }
 
 interface ApiResponse {
@@ -148,87 +152,114 @@ const LoadingState = () => (
   </div>
 );
 
+const CourseCard = ({ course }: { course: CourseProps }) => (
+  <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+    <CardHeader>
+      <h3 className="font-medium">{course.title}</h3>
+      <p className="text-sm text-muted-foreground">{course.subtitle}</p>
+    </CardHeader>
+    <CardContent>
+      <p className="text-sm">
+        {course.assignmentCount} Assignment{course.assignmentCount !== 1 ? 's' : ''}
+      </p>
+    </CardContent>
+  </Card>
+);
 
 export default function Dashboard() {
   const [courses, setCourses] = useState<ApiResponse['courses']>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const { accessToken } = useAuthStore(); // Properly use the store as a hook
 
   useEffect(() => {
+    const fetchCourses = async () => {
+      if (Object.keys(courses).length > 0 || !accessToken) return; // Prevents re-fetching
+  
+      try {
+        const response = await api.get<{ courses: any; status: boolean; error?: string }>('/api/sections', {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          withCredentials: true,
+        });
+  
+        const data = response.data;
+  
+        if (!data.status) {
+          throw new Error(data.error || 'Failed to load courses');
+        }
+  
+        setCourses(data.courses);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An unexpected error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+  
     fetchCourses();
-  }, []);
-
-  const fetchCourses = async () => {
-    try {
-      const { accessToken } = useAuthStore.getState();
-    if (!accessToken) {
-      throw new Error('Access token not found');
-    }
+  }, [accessToken]);
   
-      // Make a request to the Flask backend to fetch the sections
-      console.log("ACCESSS KEY ", accessToken)
-      const response = await api.get<{ courses: any; status: boolean; error?: string }>('/api/sections', {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        withCredentials: true,
-      });
-  
-      const data = response.data;
+  if (loading) return <LoadingState />;
+  if (error) return <ErrorState message={error} />;
+  if (Object.keys(courses).length === 0) return <EmptyState />;
 
-      console.log(data)
-  
-      // Validate the response data
-      if (!data.status) {
-        throw new Error(data.error || 'Failed to load courses');
-      }
-  
-      // Check if the courses object is empty
-      if (Object.keys(data.courses).length === 0) {
-        return; // Handle the empty state if necessary
-      }
-  
-      // Update the state with the fetched courses
-      setCourses(data.courses);
-    } catch (err) {
-      // Set the error message in the state
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
-    } finally {
-      // Set the loading state to false
-      setLoading(false);
-    }
-  };
-
-  // Show loading state
-  if (loading) {
-    return <LoadingState />;
-  }
-
-  // Show error state
-  if (error) {
-    return <ErrorState message={error} />;
-  }
-
-  // Show empty state if no courses
-  if (Object.keys(courses).length === 0) {
-    return <EmptyState />;
-  }
-
-  // If we get here, we have courses to display
-  // Return your original dashboard implementation here...
   return (
-    <div className="flex flex-col h-screen bg-background">
+    <div className="flex flex-col min-h-screen bg-background">
       <header className="border-b flex-shrink-0">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center">
-          <h1 className="text-teal-600 font-semibold text-lg mr-4">Cleferr AI</h1>
-          <Button variant="ghost" size="icon" className="text-gray-600">
-            <Menu className="h-5 w-5" />
-          </Button>
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center">
+            <h1 className="text-teal-600 font-semibold text-lg mr-4">Cleferr AI</h1>
+            <Button variant="ghost" size="icon" className="text-gray-600">
+              <Menu className="h-5 w-5" />
+            </Button>
+          </div>
+          <div className="flex gap-3">
+            <Button variant="ghost" className="h-8">
+              Enroll in Course
+            </Button>
+            <Button className="bg-teal-600 hover:bg-teal-700 text-white h-8">
+              Create Course <Plus className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </header>
-      
-      {/* ... Rest of your existing dashboard implementation ... */}
+
+      <main className="flex-grow max-w-7xl mx-auto px-6 py-8">
+        <div className="mb-8">
+          <h1 className="text-2xl font-semibold mb-2">Your Courses</h1>
+          <p className="text-muted-foreground">
+            Manage your courses and assignments
+          </p>
+        </div>
+
+        {Object.entries(courses).map(([term, termCourses]) => (
+          <div key={term} className="mb-8">
+            <h2 className="text-xl font-medium mb-4">{term}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {termCourses.map((course, index) => (
+                <div
+                  key={`${course.sectionId}-${index}`}
+                  onClick={() => router.push(`/courses/${course.sectionId}`)}
+                >
+                  <CourseCard course={course} />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </main>
+
+      <footer className="border-t bg-background mt-auto">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+          <Button variant="ghost" className="h-8">Account</Button>
+          <p className="text-sm text-muted-foreground">
+            © 2024 Cleferr AI
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

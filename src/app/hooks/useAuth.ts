@@ -1,19 +1,7 @@
+import { useAuthStore } from '@/store';
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000';
-
-
-// Types for authentication
-
-
-interface AuthState {
-  accessToken: string | null;
-  setAccessToken: (token: string) => void;
-  clearAccessToken: () => void;
-}
 
 // Axios instance for API requests
 const api = axios.create({
@@ -22,21 +10,7 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Zustand auth store with persistence
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      accessToken: null,
-      setAccessToken: (token) => set({ accessToken: token }),
-      clearAccessToken: () => set({ accessToken: null }),
-    }),
-    {
-      name: 'auth-storage',
-      storage: createJSONStorage(() => sessionStorage),
-      partialize: (state) => ({ accessToken: state.accessToken }),
-    }
-  )
-);
+
 
 // Auth service
 export const authService = {

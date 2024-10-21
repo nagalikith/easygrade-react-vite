@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { authService, useAuthStore } from './hooks/useAuth';
+import { authService } from './hooks/useAuth';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation'; // Updated import
 
