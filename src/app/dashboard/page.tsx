@@ -251,15 +251,6 @@ export default function Dashboard() {
           </div>
         ))}
       </main>
-
-      <footer className="border-t bg-background mt-auto">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <Button variant="ghost" className="h-8">Account</Button>
-          <p className="text-sm text-muted-foreground">
-            © 2024 Cleferr AI
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }

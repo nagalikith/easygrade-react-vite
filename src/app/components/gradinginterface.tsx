@@ -2,42 +2,29 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Pencil, Check, Square, Eraser, Lightbulb } from 'lucide-react';
+import { Pencil, Check, Square, Eraser, Lightbulb, Upload } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Stage, Layer, Line } from 'react-konva';
-import { pdfjs,Document, Page } from 'react-pdf';
 import RubricOutline from './rubricoutline';
 
-if (typeof Promise.withResolvers === 'undefined') {
-  if (window)
-      // @ts-expect-error This does not exist outside of polyfill which this is doing
-      window.Promise.withResolvers = function () {
-          let resolve, reject;
-          const promise = new Promise((res, rej) => {
-              resolve = res;
-              reject = rej;
-          });
-          return { promise, resolve, reject };
-      };
-}
-
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
-  import.meta.url,
-).toString();
-
-const GradingInterface: React.FC = () => {
-  const [score, setScore] = useState<string>('No score');
-  const [wellDone, setWellDone] = useState<string>('');
-  const [numPages, setNumPages] = useState<number>();
-  const [pageNumber, setPageNumber] = useState<number>(1);
-  const [lines, setLines] = useState<any[]>([]);
-  const [tool, setTool] = useState<string>('pencil');
+const GradingInterface = () => {
+  const [score, setScore] = useState('No score');
+  const [wellDone, setWellDone] = useState('');
+  const [numPages, setNumPages] = useState(0);
+  const [pageNumber, setPageNumber] = useState(1);
   const [isDrawing, setIsDrawing] = useState(false);
-  const stageRef = useRef<any>(null);
-  const [stageSize, setStageSize] = useState({ width: 800, height: 600 });
+  const [tool, setTool] = useState('pencil');
+  const [lines, setLines] = useState([]);
+  const [currentLine, setCurrentLine] = useState([]);
+  const [pdfUrl, setPdfUrl] = useState(null);
+  
+  const canvasRef = useRef(null);
+  const pdfCanvasRef = useRef(null);
+  const contextRef = useRef(null);
+  const [stageSize] = useState({ width: 800, height: 600 });
+  const [pdf, setPdf] = useState(null);
 
   const leftPanelTools = [
+    { icon: <Upload size={20} />, name: 'upload' },
     { icon: <Pencil size={20} />, name: 'pencil' },
     { icon: <Check size={20} />, name: 'check' },
     { icon: <Square size={20} />, name: 'square' },
@@ -45,43 +32,105 @@ const GradingInterface: React.FC = () => {
     { icon: <Lightbulb size={20} />, name: 'lightbulb' },
   ];
 
-  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
-    setNumPages(numPages);
-    setPageNumber(1);
+  useEffect(() => {
+    // Initialize drawing canvas
+    if (canvasRef.current) {
+      const canvas = canvasRef.current;
+      canvas.width = stageSize.width;
+      canvas.height = stageSize.height;
+      
+      const ctx = canvas.getContext('2d');
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = 5;
+      ctx.strokeStyle = '#df4b26';
+      contextRef.current = ctx;
+    }
+
+    // Initialize PDF canvas
+    if (pdfCanvasRef.current) {
+      const canvas = pdfCanvasRef.current;
+      canvas.width = stageSize.width;
+      canvas.height = stageSize.height;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (contextRef.current) {
+      redrawCanvas();
+    }
+  }, [lines]);
+
+  const redrawCanvas = () => {
+    const ctx = contextRef.current;
+    ctx.clearRect(0, 0, stageSize.width, stageSize.height);
+    
+    lines.forEach(line => {
+      ctx.beginPath();
+      if (line.tool === 'eraser') {
+        ctx.globalCompositeOperation = 'destination-out';
+      } else {
+        ctx.globalCompositeOperation = 'source-over';
+      }
+      
+      for (let i = 0; i < line.points.length; i += 2) {
+        const x = line.points[i];
+        const y = line.points[i + 1];
+        
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+      ctx.stroke();
+    });
   };
 
-  const goToPrevPage = () => {
-    setPageNumber((prev) => Math.max(prev - 1, 1));
-  };
-
-  const goToNextPage = () => {
-    setPageNumber((prev) => (numPages && prev < numPages ? prev + 1 : prev));
-  };
-
-  const handleScoreInput = (item: string | number) => {
-    if (item === 'CLR') {
-      setScore('No score');
-    } else {
-      setScore((prev) => (prev === 'No score' ? item.toString() : prev + item.toString()));
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (file && file.type === 'application/pdf') {
+      const fileUrl = URL.createObjectURL(file);
+      setPdfUrl(fileUrl);
+      
+      // Load the PDF using browser's built-in PDF viewer
+      const response = await fetch(fileUrl);
+      const arrayBuffer = await response.arrayBuffer();
+      
+      // Use the browser's built-in PDF viewer
+      const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
+      const objectUrl = URL.createObjectURL(blob);
+      setPdf(objectUrl);
+      
+      // Reset to first page
+      setPageNumber(1);
     }
   };
 
-  const handleMouseDown = (e: any) => {
+  const handleMouseDown = (e) => {
     setIsDrawing(true);
-    const pos = e.target.getStage().getPointerPosition();
-    setLines([...lines, { tool, points: [pos.x, pos.y] }]);
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    setCurrentLine([x, y]);
+    setLines([...lines, { tool, points: [x, y] }]);
   };
 
-  const handleMouseMove = (e: any) => {
+  const handleMouseMove = (e) => {
     if (!isDrawing) return;
-
-    const stage = e.target.getStage();
-    const point = stage.getPointerPosition();
-    let lastLine = lines[lines.length - 1];
-    lastLine.points = lastLine.points.concat([point.x, point.y]);
-
-    lines.splice(lines.length - 1, 1, lastLine);
-    setLines(lines.concat());
+    
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const updatedLines = [...lines];
+    const currentLinePoints = updatedLines[updatedLines.length - 1].points;
+    updatedLines[updatedLines.length - 1] = {
+      tool,
+      points: [...currentLinePoints, x, y]
+    };
+    
+    setLines(updatedLines);
   };
 
   const handleMouseUp = () => {
@@ -89,8 +138,24 @@ const GradingInterface: React.FC = () => {
   };
 
   const handleSave = () => {
-    const uri = stageRef.current.toDataURL();
-    console.log(uri); // You can send this URI to your backend or save it as needed
+    const uri = canvasRef.current.toDataURL();
+    console.log(uri);
+  };
+
+  const goToPrevPage = () => {
+    setPageNumber((prev) => Math.max(prev - 1, 1));
+  };
+
+  const goToNextPage = () => {
+    setPageNumber((prev) => prev + 1);
+  };
+
+  const handleToolClick = (toolName) => {
+    if (toolName === 'upload') {
+      document.getElementById('pdf-upload').click();
+    } else {
+      setTool(toolName);
+    }
   };
 
   return (
@@ -98,6 +163,13 @@ const GradingInterface: React.FC = () => {
       <Card className="md:col-span-2">
         <CardHeader className="p-4 border-b">
           <div className="flex space-x-2">
+            <input
+              type="file"
+              id="pdf-upload"
+              accept="application/pdf"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
             {leftPanelTools.map((t, index) => (
               <Button 
                 key={index} 
@@ -105,7 +177,7 @@ const GradingInterface: React.FC = () => {
                 size="sm" 
                 className={`p-2 ${tool === t.name ? 'bg-gray-200' : ''}`} 
                 title={t.name}
-                onClick={() => setTool(t.name)}
+                onClick={() => handleToolClick(t.name)}
               >
                 {t.icon}
               </Button>
@@ -114,61 +186,53 @@ const GradingInterface: React.FC = () => {
         </CardHeader>
         <CardContent className="p-4">
           <div style={{ position: 'relative', width: stageSize.width, height: stageSize.height }}>
-            <Document
-              file="/savedis.pdf"
-              onLoadSuccess={onDocumentLoadSuccess}
-            >
-              <Page 
-                pageNumber={pageNumber} 
+            {pdf ? (
+              <object
+                data={pdf}
+                type="application/pdf"
                 width={stageSize.width}
                 height={stageSize.height}
-                renderTextLayer={false}
-                renderAnnotationLayer={false}
-              />
-            </Document>
-            <Stage
-              width={stageSize.width}
-              height={stageSize.height}
+                style={{ position: 'absolute', top: 0, left: 0 }}
+              >
+                <p>Your browser does not support PDFs. Please download the PDF to view it.</p>
+              </object>
+            ) : (
+              <div className="flex items-center justify-center w-full h-full bg-gray-100 text-gray-500">
+                Click the upload button to load a PDF
+              </div>
+            )}
+            <canvas
+              ref={canvasRef}
               onMouseDown={handleMouseDown}
-              onMousemove={handleMouseMove}
-              onMouseup={handleMouseUp}
-              ref={stageRef}
-              style={{ position: 'absolute', top: 0, left: 0 }}
-            >
-              <Layer>
-                {lines.map((line, i) => (
-                  <Line
-                    key={i}
-                    points={line.points}
-                    stroke="#df4b26"
-                    strokeWidth={5}
-                    tension={0.5}
-                    lineCap="round"
-                    lineJoin="round"
-                    globalCompositeOperation={
-                      line.tool === 'eraser' ? 'destination-out' : 'source-over'
-                    }
-                  />
-                ))}
-              </Layer>
-            </Stage>
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                cursor: isDrawing ? 'crosshair' : 'default',
+                background: 'transparent',
+                pointerEvents: tool === 'upload' ? 'none' : 'auto'
+              }}
+            />
           </div>
           <div className="flex justify-between mt-4">
             <Button onClick={goToPrevPage} disabled={pageNumber <= 1}>
               Previous
             </Button>
-            <Button onClick={goToNextPage} disabled={numPages ? pageNumber >= numPages : true}>
+            <Button onClick={goToNextPage}>
               Next
             </Button>
           </div>
           <p className="mt-2">
-            Page {pageNumber} of {numPages}
+            Page {pageNumber}
           </p>
         </CardContent>
       </Card>
 
       <Card>
-      <RubricOutline title="Demo Homework 1" initialPoints={2} />
+        <RubricOutline title="Demo Homework 1" initialPoints={2} />
       </Card>
     </div>
   );

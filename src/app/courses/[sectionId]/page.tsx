@@ -3,8 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
-import { Settings, User, Book, Clock, BarChart2, Loader2 } from 'lucide-react';
+import { Settings, User, Book, Clock, BarChart2, Loader2, FileSpreadsheet, AlertCircle, Plus  } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/store';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -19,9 +20,7 @@ interface Course {
 }
 
 interface Instructor {
-  id: string;
   name: string;
-  role: string;
 }
 
 interface Assignment {
@@ -34,6 +33,26 @@ interface Assignment {
   published: boolean;
   regrades?: number;
 }
+
+const EmptyState = () => (
+  <Card className="mt-8">
+    <CardContent className="flex flex-col items-center justify-center py-12">
+      <FileSpreadsheet className="h-16 w-16 text-gray-400 mb-4" />
+      <h3 className="text-lg font-semibold text-gray-900 mb-2">No assignments yet</h3>
+      <p className="text-gray-500 text-center mb-6 max-w-md">
+        Get started by creating your first assignment. You can set due dates, 
+        upload materials, and manage submissions all in one place.
+      </p>
+      <Button 
+        className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700"
+      >
+        <Plus className="h-4 w-4" />
+        Create Assignment
+      </Button>
+    </CardContent>
+  </Card>
+);
+
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000',
@@ -52,6 +71,7 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
 
 export default function CoursePageComponent() {
   const router = useRouter();
@@ -123,6 +143,8 @@ export default function CoursePageComponent() {
     }
     return null;
   };
+
+  
 
   // Fetch course and assignment data
   useEffect(() => {
@@ -199,7 +221,7 @@ export default function CoursePageComponent() {
     {
       icon: BarChart2,
       label: 'Dashboard',
-      path: `/courses/${course?.sectionId}/dashboard`
+      path: `/dashboard`
     },
     {
       icon: Book,
@@ -239,6 +261,8 @@ export default function CoursePageComponent() {
     );
   }
 
+  if (Object.keys(assignments).length === 1) return <EmptyState />;
+
   return (
     <div className="bg-blue-50 p-4">
       <div className="mx-auto bg-white rounded-lg shadow-lg">
@@ -273,12 +297,6 @@ export default function CoursePageComponent() {
 
             <div className="mt-9">
               <h2 className="text-sm uppercase text-blue-300 mb-2">Instructors</h2>
-              {course?.instructors.map(instructor => (
-                <div key={instructor.id} className="flex items-center">
-                  <User className="mr-2" size={20} />
-                  <span>{instructor.name}</span>
-                </div>
-              ))}
             </div>
           </div>
 
@@ -293,7 +311,12 @@ export default function CoursePageComponent() {
                 Entry Code: <span className="font-mono text-indigo-600">{course?.entryCode}</span>
               </div>
             </div>
-
+                <Button
+                  className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700"
+                >
+                  <Plus className="h-4 w-4" />
+                  New Assignment
+                </Button>
             <div className="mb-6">
               <h2 className="text-lg font-semibold mb-2 text-gray-800">Description</h2>
               <p className="text-gray-600">{course?.description}</p>
@@ -301,20 +324,6 @@ export default function CoursePageComponent() {
 
             <div className="mb-6">
               <h2 className="text-lg font-semibold mb-2 text-gray-800">Things To Do</h2>
-              <ul className="list-disc list-inside text-gray-600">
-                {assignments
-                  .filter(a => a.graded < 100)
-                  .map(a => (
-                    <li key={a.id}>Finish grading {a.name}</li>
-                  ))}
-                {assignments
-                  .filter(a => a.regrades && a.regrades > 0)
-                  .map(a => (
-                    <li key={a.id}>
-                      Respond to {a.regrades} outstanding regrade requests for {a.name}
-                    </li>
-                  ))}
-              </ul>
             </div>
 
             <div>

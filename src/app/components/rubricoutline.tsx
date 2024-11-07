@@ -27,15 +27,13 @@ const RubricOutline: React.FC<RubricOutlineProps> = ({ title, initialPoints = 2 
   const [expandedQuestions, setExpandedQuestions] = useState<number[]>([2]);
 
   useEffect(() => {
-    const calculateTotalPoints = (qs: Question[]): number => {
-      return qs.reduce((total, q) => {
-        return total + q.points + calculateTotalPoints(q.subQuestions);
-      }, 0);
-    };
+    const calculateTotalPoints = (qs: Question[]): number =>
+      qs.reduce((total, q) => total + q.points + calculateTotalPoints(q.subQuestions), 0);
+    
     setTotalPoints(calculateTotalPoints(questions));
   }, [questions]);
 
-  const addQuestion = (parentId: number | null = null, level: number = 0): void => {
+  const addQuestion = (parentId: number | null = null): void => {
     const newQuestion: Question = {
       id: Date.now(),
       title: 'Question title',
@@ -43,22 +41,15 @@ const RubricOutline: React.FC<RubricOutlineProps> = ({ title, initialPoints = 2 
       subQuestions: [],
     };
 
-    const addQuestionRecursive = (qs: Question[], targetId: number, currentLevel: number): Question[] => {
-      return qs.map(q => {
-        if (q.id === targetId) {
-          return { ...q, subQuestions: [...q.subQuestions, newQuestion] };
-        }
-        if (q.subQuestions.length > 0) {
-          return { ...q, subQuestions: addQuestionRecursive(q.subQuestions, targetId, currentLevel + 1) };
-        }
-        return q;
-      });
-    };
+    const addQuestionRecursive = (qs: Question[], targetId: number): Question[] =>
+      qs.map(q => q.id === targetId 
+        ? { ...q, subQuestions: [...q.subQuestions, newQuestion] }
+        : { ...q, subQuestions: addQuestionRecursive(q.subQuestions, targetId) });
 
     if (parentId === null) {
       setQuestions([...questions, newQuestion]);
     } else {
-      setQuestions(addQuestionRecursive(questions, parentId, 0));
+      setQuestions(addQuestionRecursive(questions, parentId));
     }
 
     if (parentId && !expandedQuestions.includes(parentId)) {
@@ -67,42 +58,33 @@ const RubricOutline: React.FC<RubricOutlineProps> = ({ title, initialPoints = 2 
   };
 
   const removeQuestion = (id: number): void => {
-    const removeQuestionRecursive = (qs: Question[], targetId: number): Question[] => {
-      return qs.filter(q => q.id !== targetId).map(q => {
-        if (q.subQuestions.length > 0) {
-          return { ...q, subQuestions: removeQuestionRecursive(q.subQuestions, targetId) };
-        }
-        return q;
-      });
-    };
+    const removeQuestionRecursive = (qs: Question[], targetId: number): Question[] =>
+      qs.filter(q => q.id !== targetId).map(q => ({
+        ...q,
+        subQuestions: removeQuestionRecursive(q.subQuestions, targetId)
+      }));
 
     setQuestions(removeQuestionRecursive(questions, id));
   };
 
   const updateQuestion = (id: number, field: keyof Question, value: string | number): void => {
-    const updateQuestionRecursive = (qs: Question[]): Question[] => {
-      return qs.map(q => {
-        if (q.id === id) {
-          return { ...q, [field]: value };
-        }
-        if (q.subQuestions.length > 0) {
-          return { ...q, subQuestions: updateQuestionRecursive(q.subQuestions) };
-        }
-        return q;
-      });
-    };
+    const updateQuestionRecursive = (qs: Question[]): Question[] =>
+      qs.map(q => q.id === id 
+        ? { ...q, [field]: value }
+        : { ...q, subQuestions: updateQuestionRecursive(q.subQuestions) });
 
     setQuestions(updateQuestionRecursive(questions));
   };
 
   const toggleExpand = (id: number): void => {
-    setExpandedQuestions(prev => 
+    setExpandedQuestions(prev =>
       prev.includes(id) ? prev.filter(qId => qId !== id) : [...prev, id]
     );
   };
 
   const renderQuestion = (question: Question, index: number, parentNumbers: number[] = []): JSX.Element => {
     const currentNumber = [...parentNumbers, index + 1].join('.');
+    
     return (
       <React.Fragment key={question.id}>
         <div className={`flex items-center gap-2 mb-2 ml-${parentNumbers.length * 4}`}>
@@ -111,12 +93,12 @@ const RubricOutline: React.FC<RubricOutlineProps> = ({ title, initialPoints = 2 
               {expandedQuestions.includes(question.id) ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
             </Button>
           )}
-          {question.subQuestions.length === 0 && <div className="w-8"></div>}
-          <div className="w-12 text-gray-500">{currentNumber}</div>
+          <div className="w-12 text-green-600">{currentNumber}</div>
           <Input
             value={question.title}
             onChange={(e) => updateQuestion(question.id, 'title', e.target.value)}
             className="flex-grow"
+            placeholder="Enter question title"
           />
           <Input
             type="number"
@@ -127,11 +109,11 @@ const RubricOutline: React.FC<RubricOutlineProps> = ({ title, initialPoints = 2 
           <Button variant="ghost" size="icon" onClick={() => removeQuestion(question.id)}>
             <X size={16} />
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => addQuestion(question.id, parentNumbers.length + 1)}>
+          <Button variant="ghost" size="icon" onClick={() => addQuestion(question.id)}>
             <Plus size={16} />
           </Button>
         </div>
-        {expandedQuestions.includes(question.id) && question.subQuestions.map((sq, sqIndex) => 
+        {expandedQuestions.includes(question.id) && question.subQuestions.map((sq, sqIndex) =>
           renderQuestion(sq, sqIndex, [...parentNumbers, index + 1])
         )}
       </React.Fragment>
@@ -141,8 +123,8 @@ const RubricOutline: React.FC<RubricOutlineProps> = ({ title, initialPoints = 2 
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <h2 className="text-2xl font-bold">Outline for {title}</h2>
-        <p>{totalPoints} points total</p>
+        <h2 className="text-2xl font-bold text-green-700">Outline for {title}</h2>
+        <p className="text-green-600">{totalPoints} points total</p>
         <p className="text-sm text-gray-500">
           Create questions and subquestions via the + buttons below. Reorder and indent questions by dragging them in the outline.
         </p>
@@ -155,13 +137,13 @@ const RubricOutline: React.FC<RubricOutlineProps> = ({ title, initialPoints = 2 
           <div className="w-16"></div>
         </div>
         {questions.map((q, index) => renderQuestion(q, index))}
-        <Button onClick={() => addQuestion(null)} className="mt-4 w-full">
-          <Plus size={16} className="mr-2" /> new question
+        <Button onClick={() => addQuestion(null)} className="mt-4 w-full bg-green-500 hover:bg-green-600 text-white">
+          <Plus size={16} className="mr-2" /> New Question
         </Button>
       </CardContent>
       <CardFooter className="flex justify-end space-x-2">
-        <Button variant="destructive">Cancel</Button>
-        <Button variant="default">Save Outline</Button>
+        <Button variant="destructive" className="bg-red-500 hover:bg-red-600 text-white">Cancel</Button>
+        <Button variant="default" className="bg-green-500 hover:bg-green-600 text-white">Save Outline</Button>
       </CardFooter>
     </Card>
   );
