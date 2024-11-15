@@ -16,70 +16,9 @@ interface Assignment {
   regrades?: number;
 }
 
-const initialAssignments: Assignment[] = [
-  {
-    id: '1',
-    name: 'Online Quiz',
-    released: 'MAR 16',
-    due: 'OCT 15 AT 11:00PM',
-    submissions: 1,
-    graded: 42,
-    published: true
-  },
-  {
-    id: '2',
-    name: 'Homework 1',
-    released: 'DEC 31',
-    due: 'JUN 17 AT 10:00AM',
-    submissions: 0,
-    graded: 0,
-    published: true
-  },
-  {
-    id: '3',
-    name: 'Demo Midterm Graded',
-    released: 'DEC 15',
-    due: '',
-    submissions: 20,
-    graded: 100,
-    published: true,
-    regrades: 2
-  },
-  {
-    id: '4',
-    name: 'Demo Midterm Ungraded',
-    released: 'DEC 15',
-    due: '',
-    submissions: 20,
-    graded: 0,
-    published: true
-  },
-
-  {
-    id: '5',
-    name: 'Demo Midterm Ungraded',
-    released: 'DEC 15',
-    due: '',
-    submissions: 20,
-    graded: 0,
-    published: true
-  },
-
-  {
-    id: '6',
-    name: 'Demo Midterm Ungraded',
-    released: 'DEC 15',
-    due: '',
-    submissions: 20,
-    graded: 0,
-    published: true
-  }
-
-  
-];
 
 export default function Home() {
-  const [assignments, setAssignments] = useState<Assignment[]>(initialAssignments);
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [draggedItem, setDraggedItem] = useState<number | null>(null);
 
   const handleDragStart = (e: React.DragEvent, index: number) => {

@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useAuthStore } from '@/store';
 
 // Define types for the form data
 type UploadSubmissionType = 'student' | 'instructor';
@@ -57,6 +58,7 @@ interface ApiResponse {
 
 export default function AssignmentSettingsDialog() {
   const [assignmentType, setAssignmentType] = useState("Select Assignment Type");
+  const { accessToken } = useAuthStore();
 
   // Options for assignment types
   const assignmentOptions = ["Homework", "Problem Set","Code Submit"];
@@ -89,18 +91,21 @@ export default function AssignmentSettingsDialog() {
         formDataToSend.append(key, value);
       }
     });
-
+  
     try {
       const response = await fetch('/api/assignments', {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`, // Include the access token in the Authorization header
+        },
         body: formDataToSend,
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to submit the assignment');
       }
-
-      const result: ApiResponse = await response.json();
+  
+      const result = await response.json();
       console.log(result.message);
       // Handle success (e.g., show a success message, close the dialog)
     } catch (error) {

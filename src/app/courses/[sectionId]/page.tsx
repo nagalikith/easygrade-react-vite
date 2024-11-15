@@ -28,10 +28,6 @@ interface Assignment {
   name: string;
   released: string;
   due: string;
-  submissions: number;
-  graded: number;
-  published: boolean;
-  regrades?: number;
 }
 
 const EmptyState = () => (
@@ -172,9 +168,12 @@ export default function CoursePageComponent() {
             withCredentials: true,
           }),
         ]);
+
+        console.log(assignmentsResponse)
+        console.log(courseResponse)
         
         setCourse(courseResponse.data);
-        setAssignments(assignmentsResponse.data);
+        setAssignments(assignmentsResponse.data.assignments);
       } catch (err) {
         if (axios.isAxiosError(err) && err.response?.status === 401) {
           // Handle unauthorized access
@@ -226,7 +225,7 @@ export default function CoursePageComponent() {
     {
       icon: Book,
       label: 'Assignments',
-      path: `/courses/${course?.sectionId}/assignments`
+      path: `/courses/${getSectionIdFromUrl()}/assignments`
     },
     {
       icon: User,
@@ -261,7 +260,7 @@ export default function CoursePageComponent() {
     );
   }
 
-  if (Object.keys(assignments).length === 1) return <EmptyState />;
+  if (Object.keys(assignments).length === 0) return <EmptyState />;
 
   return (
     <div className="bg-blue-50 p-4">
@@ -308,11 +307,11 @@ export default function CoursePageComponent() {
                 <p className="text-gray-600">{course?.term}</p>
               </div>
               <div className="text-gray-600">
-                Entry Code: <span className="font-mono text-indigo-600">{course?.entryCode}</span>
+                Entry Code: <span className="font-mono text-green-600">{course?.entryCode}</span>
               </div>
             </div>
                 <Button
-                  className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700"
+                  className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
                 >
                   <Plus className="h-4 w-4" />
                   New Assignment
@@ -347,34 +346,13 @@ export default function CoursePageComponent() {
                   className="grid grid-cols-7 gap-4 items-center bg-gray-50 p-4 rounded-lg mb-2 cursor-move hover:bg-gray-100 transition duration-200"
                 >
                   <div 
-                    className="col-span-2 hover:text-indigo-600 cursor-pointer"
-                    onClick={() => handleCourseNavigation(`${course?.sectionId}/assignments/${assignment.id}`)}
+                    className="col-span-2 hover:text-green-600 cursor-pointer"
+                    onClick={() => handleCourseNavigation(`${getSectionIdFromUrl()}/assignments/${assignment.id}`)}
                   >
                     {assignment.name}
                   </div>
                   <div>{assignment.released}</div>
                   <div>{assignment.due}</div>
-                  <div>{assignment.submissions}</div>
-                  <div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
-                      <div
-                        className="bg-indigo-600 h-2.5 rounded-full"
-                        style={{ width: `${assignment.graded}%` }}
-                      />
-                    </div>
-                    <span className="text-sm">{assignment.graded}%</span>
-                  </div>
-                  <div>
-                    {assignment.published ? (
-                      <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                        ON
-                      </span>
-                    ) : (
-                      <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                        OFF
-                      </span>
-                    )}
-                  </div>
                 </div>
               ))}
             </div>

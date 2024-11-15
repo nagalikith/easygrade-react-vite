@@ -1,4 +1,6 @@
-import React from 'react';
+"use client";
+
+import React, { useState } from 'react';
 import { X, FileImage, FileText, Download } from 'lucide-react';
 import {
   Dialog,
@@ -8,16 +10,50 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import AssignQuestionsToPages from '@/app/components/AssignQuestionsToPages'; // Adjust the import path if necessary
+
+interface Question {
+  id: string;
+  title: string;
+  points: number;
+}
+
+interface Page {
+  id: string;
+  assignedQuestions: string[];
+}
 
 export default function GradescopeInterface() {
+  // Sample data for questions and pages
+  const questions: Question[] = [
+    { id: 'q1', title: 'Question 1', points: 5 },
+    { id: 'q2', title: 'Question 2', points: 10 },
+    { id: 'q3', title: 'Question 3', points: 7 },
+  ];
+
+  const pages: Page[] = [
+    { id: '1', assignedQuestions: [] },
+    { id: '2', assignedQuestions: [] },
+    { id: '3', assignedQuestions: [] },
+  ];
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // Handle form submission
+  const handleAssignmentSubmit = (assignments: Record<string, string[]>) => {
+    console.log('Assignments:', assignments);
+    // Perform any additional actions, such as saving the assignments
+  };
+
+  // Toggle dialog visibility
+  const toggleDialog = () => {
+    setIsDialogOpen(!isDialogOpen);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Navigation bar */}
       <nav className="bg-white border-b px-4 py-2 flex items-center">
-        <div className="flex items-center gap-2 text-teal-600 font-semibold">
-          <div className="w-4 h-4 bg-teal-600"></div>
-          Cleferr
-        </div>
         <button className="ml-2">≡</button>
         <div className="ml-4 text-gray-600">Cleferr 101</div>
         <div className="ml-4 text-gray-400">Summer 2020</div>
@@ -25,36 +61,15 @@ export default function GradescopeInterface() {
 
       {/* Main content */}
       <div className="flex">
-        {/* Sidebar */}
-        <div className="w-64 bg-white h-screen border-r p-4">
-          <h2 className="font-semibold mb-2">Cleferr 101</h2>
-          <div className="text-sm text-gray-500 mb-4">Introduction to Cleferr</div>
-          
-          <div className="mb-4">
-            <div className="flex items-center gap-2 text-teal-600 mb-2">
-              <div className="w-4 h-4 border-2 border-teal-600"></div>
-              Dashboard
-            </div>
-            <div className="flex items-center gap-2 text-gray-600 mb-2">
-              <div className="w-4 h-4 border-2 border-gray-300 rounded-full"></div>
-              Regrade Requests
-            </div>
-          </div>
-
-          <div className="mb-2 text-gray-500 text-sm">INSTRUCTORS</div>
-          {['John Hetherington', 'Eric Reddy', 'Peter Kerr', 'Sarah Wareham', 'Jules Money', 'Amy Hutchinson'].map(name => (
-            <div key={name} className="flex items-center gap-2 mb-2 text-gray-600">
-              <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs">
-                {name.charAt(0)}
-              </div>
-              {name}
-            </div>
-          ))}
-        </div>
-
-        {/* Main area with modal */}
+        {/* Main area with modal and assignment feature */}
         <div className="flex-1 p-4">
-          <Dialog open={true}>
+          {/* Button to open dialog */}
+          <Button onClick={toggleDialog} variant="primary" className="mb-4">
+            Open Assignment Submission
+          </Button>
+
+          {/* Assignment Dialog */}
+          <Dialog open={isDialogOpen} onOpenChange={toggleDialog}>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>Submit Assignment</DialogTitle>
@@ -84,12 +99,17 @@ export default function GradescopeInterface() {
                   SUBMIT PDF
                 </Button>
               </div>
-              <Button variant="ghost" size="sm" className="absolute right-4 top-4">
+              <Button variant="ghost" size="sm" className="absolute right-4 top-4" onClick={toggleDialog}>
                 <X className="h-4 w-4" />
                 Close
               </Button>
             </DialogContent>
           </Dialog>
+
+          {/* Assign Questions to Pages Feature */}
+          <div className="mt-8">
+            <AssignQuestionsToPages questions={questions} pages={pages} onSubmit={handleAssignmentSubmit} />
+          </div>
         </div>
       </div>
     </div>

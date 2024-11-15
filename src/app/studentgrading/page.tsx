@@ -15,11 +15,6 @@ const GradingPage = () => {
       </Head>
 
       <main className="min-h-screen bg-gray-100">
-        <header className="bg-white shadow-sm">
-          <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-            <h1 className="text-2xl font-semibold text-gray-900">Grading for Demos - Math Remote Assessment</h1>
-          </div>
-        </header>
 
         <div className=" mx-auto py-6 sm:px-6 lg:px-8">
           {/* Top bar */}

@@ -1,27 +1,33 @@
 'use client';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, MouseEvent, ChangeEvent } from 'react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Pencil, Check, Square, Eraser, Lightbulb, Upload } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import RubricOutline from './rubricoutline';
+import RubricItem from './rubricitem';
 
-const GradingInterface = () => {
-  const [score, setScore] = useState('No score');
-  const [wellDone, setWellDone] = useState('');
-  const [numPages, setNumPages] = useState(0);
-  const [pageNumber, setPageNumber] = useState(1);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [tool, setTool] = useState('pencil');
-  const [lines, setLines] = useState([]);
-  const [currentLine, setCurrentLine] = useState([]);
-  const [pdfUrl, setPdfUrl] = useState(null);
-  
-  const canvasRef = useRef(null);
-  const pdfCanvasRef = useRef(null);
-  const contextRef = useRef(null);
-  const [stageSize] = useState({ width: 800, height: 600 });
-  const [pdf, setPdf] = useState(null);
+interface Line {
+  tool: string;
+  points: number[];
+}
+
+const GradingInterface: React.FC = () => {
+  const [score, setScore] = useState<string>('No score');
+  const [wellDone, setWellDone] = useState<string>('');
+  const [numPages, setNumPages] = useState<number>(0);
+  const [pageNumber, setPageNumber] = useState<number>(1);
+  const [isDrawing, setIsDrawing] = useState<boolean>(false);
+  const [tool, setTool] = useState<string>('pencil');
+  const [lines, setLines] = useState<Line[]>([]);
+  const [currentLine, setCurrentLine] = useState<number[]>([]);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const pdfCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const contextRef = useRef<CanvasRenderingContext2D | null>(null);
+  const [stageSize] = useState<{ width: number; height: number }>({ width: 800, height: 600 });
+  const [pdf, setPdf] = useState<string | null>(null);
 
   const leftPanelTools = [
     { icon: <Upload size={20} />, name: 'upload' },
@@ -33,21 +39,21 @@ const GradingInterface = () => {
   ];
 
   useEffect(() => {
-    // Initialize drawing canvas
     if (canvasRef.current) {
       const canvas = canvasRef.current;
       canvas.width = stageSize.width;
       canvas.height = stageSize.height;
-      
+
       const ctx = canvas.getContext('2d');
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.lineWidth = 5;
-      ctx.strokeStyle = '#df4b26';
-      contextRef.current = ctx;
+      if (ctx) {
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = '#df4b26';
+        contextRef.current = ctx;
+      }
     }
 
-    // Initialize PDF canvas
     if (pdfCanvasRef.current) {
       const canvas = pdfCanvasRef.current;
       canvas.width = stageSize.width;
@@ -63,74 +69,73 @@ const GradingInterface = () => {
 
   const redrawCanvas = () => {
     const ctx = contextRef.current;
-    ctx.clearRect(0, 0, stageSize.width, stageSize.height);
-    
-    lines.forEach(line => {
-      ctx.beginPath();
-      if (line.tool === 'eraser') {
-        ctx.globalCompositeOperation = 'destination-out';
-      } else {
-        ctx.globalCompositeOperation = 'source-over';
-      }
-      
-      for (let i = 0; i < line.points.length; i += 2) {
-        const x = line.points[i];
-        const y = line.points[i + 1];
-        
-        if (i === 0) {
-          ctx.moveTo(x, y);
-        } else {
-          ctx.lineTo(x, y);
+    if (ctx) {
+      ctx.clearRect(0, 0, stageSize.width, stageSize.height);
+
+      lines.forEach(line => {
+        ctx.beginPath();
+        ctx.globalCompositeOperation = line.tool === 'eraser' ? 'destination-out' : 'source-over';
+
+        for (let i = 0; i < line.points.length; i += 2) {
+          const x = line.points[i];
+          const y = line.points[i + 1];
+
+          if (i === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
         }
-      }
-      ctx.stroke();
-    });
+        ctx.stroke();
+      });
+    }
   };
 
-  const handleFileUpload = async (event) => {
-    const file = event.target.files[0];
+  const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (file && file.type === 'application/pdf') {
       const fileUrl = URL.createObjectURL(file);
       setPdfUrl(fileUrl);
-      
-      // Load the PDF using browser's built-in PDF viewer
+
       const response = await fetch(fileUrl);
       const arrayBuffer = await response.arrayBuffer();
-      
-      // Use the browser's built-in PDF viewer
+
       const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
       const objectUrl = URL.createObjectURL(blob);
       setPdf(objectUrl);
-      
-      // Reset to first page
+
       setPageNumber(1);
     }
   };
 
-  const handleMouseDown = (e) => {
+  const handleMouseDown = (e: MouseEvent<HTMLCanvasElement>) => {
     setIsDrawing(true);
-    const rect = canvasRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    setCurrentLine([x, y]);
-    setLines([...lines, { tool, points: [x, y] }]);
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (rect) {
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      setCurrentLine([x, y]);
+      setLines([...lines, { tool, points: [x, y] }]);
+    }
   };
 
-  const handleMouseMove = (e) => {
+  const handleMouseMove = (e: MouseEvent<HTMLCanvasElement>) => {
     if (!isDrawing) return;
-    
-    const rect = canvasRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    const updatedLines = [...lines];
-    const currentLinePoints = updatedLines[updatedLines.length - 1].points;
-    updatedLines[updatedLines.length - 1] = {
-      tool,
-      points: [...currentLinePoints, x, y]
-    };
-    
-    setLines(updatedLines);
+
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (rect) {
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const updatedLines = [...lines];
+      const currentLinePoints = updatedLines[updatedLines.length - 1].points;
+      updatedLines[updatedLines.length - 1] = {
+        tool,
+        points: [...currentLinePoints, x, y]
+      };
+
+      setLines(updatedLines);
+    }
   };
 
   const handleMouseUp = () => {
@@ -138,21 +143,21 @@ const GradingInterface = () => {
   };
 
   const handleSave = () => {
-    const uri = canvasRef.current.toDataURL();
+    const uri = canvasRef.current?.toDataURL();
     console.log(uri);
   };
 
   const goToPrevPage = () => {
-    setPageNumber((prev) => Math.max(prev - 1, 1));
+    setPageNumber(prev => Math.max(prev - 1, 1));
   };
 
   const goToNextPage = () => {
-    setPageNumber((prev) => prev + 1);
+    setPageNumber(prev => prev + 1);
   };
 
-  const handleToolClick = (toolName) => {
+  const handleToolClick = (toolName: string) => {
     if (toolName === 'upload') {
-      document.getElementById('pdf-upload').click();
+      document.getElementById('pdf-upload')?.click();
     } else {
       setTool(toolName);
     }
@@ -231,9 +236,14 @@ const GradingInterface = () => {
         </CardContent>
       </Card>
 
+
       <Card>
-        <RubricOutline title="Demo Homework 1" initialPoints={2} />
-      </Card>
+  <CardContent>
+    <RubricItem
+    />
+    </CardContent>
+   </Card>
+
     </div>
   );
 };
