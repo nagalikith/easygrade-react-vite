@@ -176,7 +176,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchCourses = async () => {
       if (Object.keys(courses).length > 0 || !accessToken) return; // Prevents re-fetching
-  
+  console.log("ACCESS TOKen", accessToken)
       try {
         const response = await api.get<{ courses: any; status: boolean; error?: string }>('/api/sections', {
           headers: {
@@ -185,6 +185,7 @@ export default function Dashboard() {
           withCredentials: true,
         });
   
+        
         const data = response.data;
   
         if (!data.status) {
